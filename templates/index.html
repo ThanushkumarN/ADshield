@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ad Scam Detection</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f9;
+        }
+        .container {
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #333;
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            resize: none;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background: #e9ecef;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Ad Scam Detection</h1>
+        <form id="adForm">
+            <textarea name="ad_text" id="ad_text" placeholder="Enter ad text here..."></textarea>
+            <button type="submit">Analyze</button>
+        </form>
+        <div id="result" class="result" style="display: none;"></div>
+    </div>
+    <script>
+        const form = document.getElementById('adForm');
+        const resultDiv = document.getElementById('result');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const adText = document.getElementById('ad_text').value;
+
+            if (!adText) {
+                alert('Please enter ad text to analyze.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: new URLSearchParams({ ad_text: adText }),
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    resultDiv.style.display = 'block';
+                    resultDiv.innerHTML = `
+                        <strong>Analysis Result:</strong><br>
+                        Prediction: ${data.prediction}<br>
+                        Suspicious: ${data.is_suspicious ? 'Yes' : 'No'}<br>
+                        Keywords Matched: ${data.scam_match ? 'Yes' : 'No'}
+                    `;
+                } else {
+                    alert(data.error || 'Something went wrong.');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error analyzing ad text. Please try again.');
+            }
+        });
+    </script>
+</body>
+</html>
